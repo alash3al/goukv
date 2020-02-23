@@ -1,6 +1,6 @@
 Overview
 =========
-![](https://godoc.org/github.com/alash3al/goukv?status.svg)
+[![](https://godoc.org/github.com/alash3al/goukv?status.svg)](https://godoc.org/github.com/alash3al/goukv)
 > `goukv` is an abstraction layer for golang based key-value stores, it is easy to add any backend provider.
 
 Available Providers
