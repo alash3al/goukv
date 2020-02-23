@@ -1,11 +1,11 @@
 Overview
 =========
-> `goukv` is a unified interface for golang based key-value stores, it is easy to add any backend provider.
+> `goukv` is an abstraction layer for golang based key-value stores, it is easy to add any backend provider.
 
 Available Providers
 ===================
-- `badgerdb`: [BadgerDB](/badgerdb)
-- `golveldb`: [GolevelDB](/goleveldb)
+- `badgerdb`: [BadgerDB](/providers/badgerdb)
+- `golveldb`: [GolevelDB](/providers/goleveldb)
 
 Why
 ===
