@@ -26,7 +26,7 @@ func (e Value) IsExpired() bool {
 }
 
 // EntryToValue build a value from entry representation
-func EntryToValue(e goukv.Entry) Value {
+func EntryToValue(e *goukv.Entry) Value {
 	val := Value{
 		Value:   e.Value,
 		Expires: nil,

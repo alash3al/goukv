@@ -48,14 +48,14 @@ func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
 }
 
 // Put implements goukv.Put
-func (p Provider) Put(e goukv.Entry) error {
+func (p Provider) Put(e *goukv.Entry) error {
 	return p.db.Put(e.Key, EntryToValue(e).Bytes(), &opt.WriteOptions{
 		Sync: p.syncWrites,
 	})
 }
 
 // Batch perform multi put operation, empty value means *delete*
-func (p Provider) Batch(entries []goukv.Entry) error {
+func (p Provider) Batch(entries []*goukv.Entry) error {
 	batch := new(leveldb.Batch)
 
 	for _, entry := range entries {
@@ -85,12 +85,6 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 	}
 
 	return val.Value, err
-}
-
-// Has implements goukv.Has
-func (p Provider) Has(k []byte) (bool, error) {
-	b, err := p.Get(k)
-	return b != nil, err
 }
 
 // Delete implements goukv.Delete

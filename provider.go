@@ -13,11 +13,10 @@ var (
 // Provider an interface describes a storage backend
 type Provider interface {
 	Open(map[string]interface{}) (Provider, error)
-	Put(Entry) error
+	Put(*Entry) error
 	Get([]byte) ([]byte, error)
-	Has([]byte) (bool, error)
 	Delete([]byte) error
-	Batch([]Entry) error
+	Batch([]*Entry) error
 	Scan(ScanOpts)
 	Close() error
 }

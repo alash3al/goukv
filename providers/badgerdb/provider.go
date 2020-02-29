@@ -59,11 +59,11 @@ func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
 }
 
 // Put implements goukv.Put
-func (p Provider) Put(entry goukv.Entry) error {
+func (p Provider) Put(entry *goukv.Entry) error {
 	return p.db.Update(func(txn *badger.Txn) error {
 		if entry.TTL > 0 {
 			badgerEntry := badger.NewEntry(entry.Key, entry.Value)
-			badgerEntry.WithTTL(time.Duration(entry.TTL) * time.Second)
+			badgerEntry.WithTTL(entry.TTL)
 			return txn.SetEntry(badgerEntry)
 		}
 
@@ -72,7 +72,7 @@ func (p Provider) Put(entry goukv.Entry) error {
 }
 
 // Batch perform multi put operation, empty value means *delete*
-func (p Provider) Batch(entries []goukv.Entry) error {
+func (p Provider) Batch(entries []*goukv.Entry) error {
 	batch := p.db.NewWriteBatch()
 	defer batch.Cancel()
 
@@ -83,7 +83,7 @@ func (p Provider) Batch(entries []goukv.Entry) error {
 		} else {
 			if entry.TTL > 0 {
 				badgerEntry := badger.NewEntry(entry.Key, entry.Value)
-				badgerEntry.WithTTL(time.Duration(entry.TTL) * time.Second)
+				badgerEntry.WithTTL(entry.TTL)
 
 				err = batch.SetEntry(badgerEntry)
 			} else {
@@ -106,9 +106,9 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 	err := p.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(k)
 		if err == badger.ErrKeyNotFound {
-			data = nil
-			return nil
+			return goukv.ErrKeyNotFound
 		}
+
 		if err != nil {
 			return err
 		}
@@ -124,21 +124,6 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 	})
 
 	return data, err
-}
-
-// Has implements goukv.Has
-func (p Provider) Has(k []byte) (bool, error) {
-	data, err := p.Get(k)
-
-	if err == badger.ErrKeyNotFound {
-		return false, nil
-	}
-
-	if err != nil {
-		return false, err
-	}
-
-	return data != nil, nil
 }
 
 // Delete implements goukv.Delete
