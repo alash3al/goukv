@@ -19,6 +19,7 @@ Backend Stores Rules
 - `Nil` value means *DELETE*.
 - Respect the `Entry` struct.
 - Respect the `ScanOpts` struct.
+- On key not found, return `goukv.ErrKeyNotFound`, this replaces `has()`.
 
 Example
 =======
