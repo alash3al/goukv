@@ -2,6 +2,7 @@ package goukv
 
 import (
 	"sync"
+	"time"
 )
 
 // providers a providers for available drivers
@@ -15,6 +16,7 @@ type Provider interface {
 	Open(map[string]interface{}) (Provider, error)
 	Put(*Entry) error
 	Get([]byte) ([]byte, error)
+	TTL([]byte) (*time.Time, error)
 	Delete([]byte) error
 	Batch([]*Entry) error
 	Scan(ScanOpts)

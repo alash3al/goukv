@@ -126,6 +126,31 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 	return data, err
 }
 
+// TTL implements goukv.TTL
+func (p Provider) TTL(k []byte) (*time.Time, error) {
+	var t *time.Time
+	err := p.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get(k)
+		if err == badger.ErrKeyNotFound {
+			return goukv.ErrKeyNotFound
+		}
+
+		if err != nil {
+			return err
+		}
+
+		expiresAt := item.ExpiresAt()
+		if expiresAt > 0 {
+			toUnix := time.Unix(int64(expiresAt), 0)
+			t = &toUnix
+		}
+
+		return err
+	})
+
+	return t, err
+}
+
 // Delete implements goukv.Delete
 func (p Provider) Delete(k []byte) error {
 	return p.db.Update(func(txn *badger.Txn) error {

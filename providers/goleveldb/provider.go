@@ -2,6 +2,7 @@ package leveldb
 
 import (
 	"errors"
+	"time"
 
 	"github.com/alash3al/goukv"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -85,6 +86,18 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 	}
 
 	return val.Value, err
+}
+
+// TTL implements goukv.TTL
+func (p Provider) TTL(k []byte) (*time.Time, error) {
+	b, err := p.db.Get(k, nil)
+	if err == leveldb.ErrNotFound {
+		return nil, nil
+	}
+
+	val := BytesToValue(b)
+
+	return val.Expires, nil
 }
 
 // Delete implements goukv.Delete
