@@ -95,6 +95,10 @@ func (p Provider) TTL(k []byte) (*time.Time, error) {
 		return nil, nil
 	}
 
+	if err != nil {
+		return nil, err
+	}
+
 	val := BytesToValue(b)
 
 	return val.Expires, nil
