@@ -19,7 +19,7 @@ type Provider interface {
 	TTL([]byte) (*time.Time, error)
 	Delete([]byte) error
 	Batch([]*Entry) error
-	Scan(ScanOpts)
+	Scan(ScanOpts) error
 	Close() error
 }
 

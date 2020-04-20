@@ -1,6 +1,6 @@
 goleveldb Provider
 =================
-> a [badgerdb](https://github.com/syndtr/goleveldb) based provider
+> a [goleveldb](https://github.com/syndtr/goleveldb) based provider
 
 Options
 =======
