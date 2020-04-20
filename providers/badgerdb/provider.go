@@ -166,7 +166,7 @@ func (p Provider) Close() error {
 // Scan implements goukv.Scan
 func (p Provider) Scan(opts goukv.ScanOpts) {
 	if opts.Scanner == nil {
-		return
+		return nil
 	}
 
 	txn := p.db.NewTransaction(false)
@@ -201,4 +201,6 @@ func (p Provider) Scan(opts goukv.ScanOpts) {
 			break
 		}
 	}
+
+	return nil
 }

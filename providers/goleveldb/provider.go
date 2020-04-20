@@ -92,7 +92,7 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 func (p Provider) TTL(k []byte) (*time.Time, error) {
 	b, err := p.db.Get(k, nil)
 	if err == leveldb.ErrNotFound {
-		return nil, nil
+		return nil, goukv.ErrKeyNotFound
 	}
 
 	if err != nil {
@@ -117,9 +117,9 @@ func (p Provider) Close() error {
 }
 
 // Scan implements goukv.Scan
-func (p Provider) Scan(opts goukv.ScanOpts) {
+func (p Provider) Scan(opts goukv.ScanOpts) error {
 	if opts.Scanner == nil {
-		return
+		return nil
 	}
 
 	var iter iterator.Iterator
@@ -180,4 +180,6 @@ func (p Provider) Scan(opts goukv.ScanOpts) {
 			break
 		}
 	}
+
+	return nil
 }
