@@ -7,6 +7,7 @@ Available Providers
 ===================
 - `badgerdb`: [BadgerDB](/providers/badgerdb)
 - `golveldb`: [GolevelDB](/providers/goleveldb)
+- `postgres`: [Postgresql](/providers/postgres)
 
 Why
 ===
