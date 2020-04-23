@@ -21,6 +21,10 @@ func (e Value) Bytes() []byte {
 
 // IsExpired whether the value is expired or not
 func (e Value) IsExpired() bool {
+	if e.Expires == nil {
+		return false
+	}
+
 	expires := *(e.Expires)
 	return time.Now().After(expires) || time.Now().Equal(expires)
 }

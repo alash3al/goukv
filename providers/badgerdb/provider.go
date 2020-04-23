@@ -164,7 +164,7 @@ func (p Provider) Close() error {
 }
 
 // Scan implements goukv.Scan
-func (p Provider) Scan(opts goukv.ScanOpts) {
+func (p Provider) Scan(opts goukv.ScanOpts) error {
 	if opts.Scanner == nil {
 		return nil
 	}

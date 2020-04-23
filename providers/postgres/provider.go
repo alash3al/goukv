@@ -16,7 +16,8 @@ import (
 
 // Provider represents a driver
 type Provider struct {
-	db *sqlx.DB
+	db    *sqlx.DB
+	table string
 }
 
 // Open implements goukv.Open
@@ -31,24 +32,30 @@ func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
 		return nil, err
 	}
 
+	table, ok := opts["table"].(string)
+	if !ok {
+		return nil, errors.New("invalid table specified")
+	}
+
 	if _, err := db.Exec(`
 		CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-		CREATE TABLE IF NOT EXISTS goukv_store (
+		CREATE TABLE IF NOT EXISTS ` + (table) + ` (
 			_id SERIAL PRIMARY KEY,
 			_k 	VARCHAR,
 			_v  TEXT,
 			_x  BIGINT DEFAULT 0
 		);
 
-		CREATE UNIQUE INDEX IF NOT EXISTS idx_goukvstore_k ON goukv_store(_k);
-		CREATE INDEX IF NOT EXISTS idx_gintrgm_goukvstore_k ON goukv_store USING GIN(_k gin_trgm_ops);
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_` + (table) + `_k ON ` + (table) + `(_k);
+		CREATE INDEX IF NOT EXISTS idx_gintrgm_` + (table) + `_k ON ` + (table) + ` USING GIN(_k gin_trgm_ops);
 	`); err != nil {
 		return nil, err
 	}
 
 	return &Provider{
-		db: db,
+		db:    db,
+		table: table,
 	}, nil
 }
 
@@ -65,7 +72,7 @@ func (p Provider) Put(e *goukv.Entry) error {
 	}
 
 	query := `
-		INSERT INTO goukv_store(_k, _v, _x) VALUES(:_k, :_v, :_x)
+		INSERT INTO ` + (p.table) + `(_k, _v, _x) VALUES(:_k, :_v, :_x)
 		ON CONFLICT (_k) DO UPDATE
 			SET _v = :_v,
 				_x = :_x
@@ -79,7 +86,7 @@ func (p Provider) Put(e *goukv.Entry) error {
 func (p Provider) Get(k []byte) ([]byte, error) {
 	var item Item
 
-	err := p.db.Get(&item, `SELECT * FROM goukv_store WHERE _k = $1`, k)
+	err := p.db.Get(&item, `SELECT * FROM `+(p.table)+` WHERE _k = $1`, k)
 	if err == sql.ErrNoRows {
 		return nil, goukv.ErrKeyNotFound
 	}
@@ -99,7 +106,7 @@ func (p Provider) Get(k []byte) ([]byte, error) {
 func (p Provider) TTL(k []byte) (*time.Time, error) {
 	var item Item
 
-	err := p.db.Get(&item, `SELECT * FROM goukv_store WHERE _k = $1`, k)
+	err := p.db.Get(&item, `SELECT * FROM `+(p.table)+` WHERE _k = $1`, k)
 	if err == sql.ErrNoRows {
 		return nil, goukv.ErrKeyNotFound
 	}
@@ -118,7 +125,7 @@ func (p Provider) TTL(k []byte) (*time.Time, error) {
 
 // Delete implements goukv.Delete
 func (p Provider) Delete(k []byte) error {
-	_, err := p.db.Exec(`DELETE FROM goukv_store WHERE _k = $1`, k)
+	_, err := p.db.Exec(`DELETE FROM `+(p.table)+` WHERE _k = $1`, k)
 	return err
 }
 
@@ -156,7 +163,7 @@ func (p Provider) Scan(opts goukv.ScanOpts) error {
 		return nil
 	}
 
-	query := `SELECT * FROM goukv_store`
+	query := `SELECT * FROM ` + (p.table) + ``
 	where := []string{}
 	sortOrder := "ASC"
 	args := []interface{}{}
@@ -166,7 +173,7 @@ func (p Provider) Scan(opts goukv.ScanOpts) error {
 	}
 
 	if len(opts.Offset) > 0 {
-		where = append(where, `_id >= (SELECT _id FROM goukv_store WHERE _k = $1)`)
+		where = append(where, `_id >= (SELECT _id FROM `+(p.table)+` WHERE _k = $1)`)
 		args = append(args, string(opts.Offset))
 	}
 
