@@ -176,7 +176,7 @@ func (p Provider) Scan(opts goukv.ScanOpts) error {
 			continue
 		}
 
-		if !opts.Scanner(newK, newV) {
+		if !opts.Scanner(newK, decodedValue.Value) {
 			break
 		}
 	}
