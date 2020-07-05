@@ -21,21 +21,14 @@ type Provider struct {
 }
 
 // Open implements goukv.Open
-func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
-	driverDSN, ok := opts["dsn"].(string)
-	if !ok {
-		return nil, errors.New("invalid sql DSN specified")
-	}
-
+func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
+	driverDSN := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dsn.Username(), dsn.Password(), dsn.Hostname(), dsn.Port(), dsn.Path())
 	db, err := sqlx.Connect("postgres", driverDSN)
 	if err != nil {
 		return nil, err
 	}
 
-	table, ok := opts["table"].(string)
-	if !ok {
-		return nil, errors.New("invalid table specified")
-	}
+	table := dsn.GetString("table")
 
 	if _, err := db.Exec(`
 		CREATE EXTENSION IF NOT EXISTS pg_trgm;

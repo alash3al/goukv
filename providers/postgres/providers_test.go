@@ -8,15 +8,20 @@ import (
 )
 
 func openDBAndDo(fn func(db goukv.Provider)) error {
-	p := Provider{}
-	db, err := p.Open(map[string]interface{}{
-		"dsn":   "postgres://postgres:@localhost/tstdb?sslmode=disable",
-		"table": "goukv_store_1",
-	})
+	dsn, err := goukv.NewDSN("postgres://postgres:@localhost/tst?table=default")
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	p := Provider{}
+
+	db, err := p.Open(dsn)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		db.Close()
+	}()
 
 	fn(db)
 
