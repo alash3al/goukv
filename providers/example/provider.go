@@ -10,7 +10,7 @@ import (
 type Provider struct{}
 
 // Open implements goukv.Open
-func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
+func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
 	return nil, nil
 }
 

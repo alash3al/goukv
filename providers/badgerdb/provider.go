@@ -1,7 +1,6 @@
 package badgerdb
 
 import (
-	"errors"
 	"time"
 
 	"github.com/alash3al/goukv"
@@ -16,16 +15,10 @@ type Provider struct {
 }
 
 // Open implements goukv.Open
-func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
-	path, ok := opts["path"].(string)
-	if !ok {
-		return nil, errors.New("must specify path")
-	}
+func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
+	path := dsn.Hostname() + dsn.Path()
 
-	syncWrites, ok := opts["sync_writes"].(bool)
-	if !ok {
-		syncWrites = false
-	}
+	syncWrites := dsn.GetBool("sync_writes")
 
 	badgerOpts := badger.DefaultOptions(path)
 

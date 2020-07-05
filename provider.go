@@ -13,7 +13,7 @@ var (
 
 // Provider an interface describes a storage backend
 type Provider interface {
-	Open(map[string]interface{}) (Provider, error)
+	Open(*DSN) (Provider, error)
 	Put(*Entry) error
 	Get([]byte) ([]byte, error)
 	TTL([]byte) (*time.Time, error)
@@ -50,11 +50,16 @@ func Get(providerName string) (Provider, error) {
 }
 
 // Open initialize the specified provider and returns its instance
-func Open(providerName string, opts map[string]interface{}) (Provider, error) {
+func Open(providerName, dsn string) (Provider, error) {
+	dsnParsed, err := NewDSN(dsn)
+	if err != nil {
+		return nil, err
+	}
+
 	providerInterface, err := Get(providerName)
 	if err != nil {
 		return nil, err
 	}
 
-	return providerInterface.Open(opts)
+	return providerInterface.Open(dsnParsed)
 }

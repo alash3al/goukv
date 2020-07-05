@@ -1,7 +1,6 @@
 package leveldb
 
 import (
-	"errors"
 	"time"
 
 	"github.com/alash3al/goukv"
@@ -19,16 +18,9 @@ type Provider struct {
 }
 
 // Open implements goukv.Open
-func (p Provider) Open(opts map[string]interface{}) (goukv.Provider, error) {
-	path, ok := opts["path"].(string)
-	if !ok {
-		return nil, errors.New("must specify path")
-	}
-
-	syncWrites, ok := opts["sync_writes"].(bool)
-	if !ok {
-		syncWrites = false
-	}
+func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
+	path := dsn.Hostname() + dsn.Path()
+	syncWrites := dsn.GetBool("sync_writes")
 
 	o := &opt.Options{
 		Filter:         filter.NewBloomFilter(10),

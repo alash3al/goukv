@@ -10,14 +10,19 @@ import (
 
 func openDBAndDo(fn func(db goukv.Provider)) error {
 	p := Provider{}
-	db, err := p.Open(map[string]interface{}{
-		"path": "./db",
-	})
+	dsn, err := goukv.NewDSN("badgerdb://./db")
 	if err != nil {
 		return err
 	}
-	defer db.Close()
-	defer os.RemoveAll("./db")
+	db, err := p.Open(dsn)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		db.Close()
+		os.RemoveAll("./db")
+	}()
 
 	fn(db)
 
