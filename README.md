@@ -35,9 +35,7 @@ import (
 )
 
 func main() {
-    db, err := goukv.Open("goleveldb", map[string]interface{}{
-        "path": "./db",
-    })
+    db, err := goukv.Open("leveldb", "./")
 
     if err != nil {
         panic(err.Error())
@@ -45,7 +43,7 @@ func main() {
 
     defer db.Close()
 
-    db.Put(goukv.Entry{
+    db.Put(&goukv.Entry{
         Key: []byte("k1"),
         Value: []byte("v1"),
         TTL: time.Second * 10,

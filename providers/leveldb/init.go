@@ -3,7 +3,7 @@ package leveldb
 import "github.com/alash3al/goukv"
 
 const (
-	name = "goleveldb"
+	name = "leveldb"
 )
 
 func init() {
