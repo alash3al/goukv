@@ -2,6 +2,6 @@ Postgres Provider
 =================
 > a postgres based provider
 
-Options
+DSN
 =======
-- `dsn`: std `database/sql` dsn.
+> `user:pass@host:port/dbname?opt=val`

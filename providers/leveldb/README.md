@@ -4,5 +4,4 @@ goleveldb Provider
 
 Options
 =======
-- `path`: the db path, `required`.
-- `sync_writes`: whether to sync writes or not.
+> `/path/to/dir/?opt=val`
