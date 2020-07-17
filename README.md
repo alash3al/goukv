@@ -16,7 +16,6 @@ Why
 Backend Stores Rules
 =====================
 > just keep it simple stupid!
-- Use the `map[string]interface{}` as your options.
 - `Nil` value means *DELETE*.
 - Respect the `Entry` struct.
 - Respect the `ScanOpts` struct.
