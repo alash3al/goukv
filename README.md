@@ -30,7 +30,7 @@ import (
     "time"
     "fmt"
     "github.com/alash3al/goukv" 
-    _ "github.com/alash3al/goukv/providers/goleveldb"
+    _ "github.com/alash3al/goukv/providers/leveldb"
 )
 
 func main() {
