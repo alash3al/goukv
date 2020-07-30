@@ -6,7 +6,7 @@ Overview
 Available Providers
 ===================
 - `badgerdb`: [BadgerDB](/providers/badgerdb)
-- `golveldb`: [GolevelDB](/providers/leveldb)
+- `leveldb`: [levelDB](/providers/leveldb)
 - `postgres`: [Postgresql](/providers/postgres)
 
 Why
