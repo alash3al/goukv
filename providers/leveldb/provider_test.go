@@ -1,6 +1,7 @@
 package leveldb
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -54,6 +55,28 @@ func TestPutGet(t *testing.T) {
 	}
 }
 
+func TestIncr(t *testing.T) {
+	err := openDBAndDo(func(db goukv.Provider) {
+		k := []byte("counter001")
+		newVal, err := db.Incr(k, 1)
+		if err != nil {
+			t.Error(err)
+		}
+
+		val, err := db.Get(k)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if fmt.Sprintf("%f", newVal) != string(val) {
+			t.Errorf("INCR KEY counted value (%f) isn't the same as the raw value (%s)", newVal, val)
+		}
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+}
 func TestTTL(t *testing.T) {
 	err := openDBAndDo(func(db goukv.Provider) {
 		entry := goukv.Entry{

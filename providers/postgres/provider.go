@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/alash3al/goukv"
@@ -17,12 +19,13 @@ import (
 // Provider represents a driver
 type Provider struct {
 	db    *sqlx.DB
+	l     *sync.RWMutex
 	table string
 }
 
 // Open implements goukv.Open
 func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
-	driverDSN := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dsn.Username(), dsn.Password(), dsn.Hostname(), dsn.Port(), dsn.Path())
+	driverDSN := fmt.Sprintf("postgres://%s:%s@%s:%s%s", dsn.Username(), dsn.Password(), dsn.Hostname(), dsn.Port(), dsn.Path())
 	db, err := sqlx.Connect("postgres", driverDSN)
 	if err != nil {
 		return nil, err
@@ -36,7 +39,7 @@ func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
 		CREATE TABLE IF NOT EXISTS ` + (table) + ` (
 			_id SERIAL PRIMARY KEY,
 			_k 	VARCHAR,
-			_v  TEXT,
+			_v  JSONB,
 			_x  BIGINT DEFAULT 0
 		);
 
@@ -48,6 +51,7 @@ func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
 
 	return &Provider{
 		db:    db,
+		l:     &sync.RWMutex{},
 		table: table,
 	}, nil
 }
@@ -73,6 +77,46 @@ func (p Provider) Put(e *goukv.Entry) error {
 	_, err := p.db.NamedExec(query, item)
 
 	return err
+}
+
+func (p Provider) Incr(k []byte, delta float64) (float64, error) {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	ttl, err := p.TTL(k)
+	if err != goukv.ErrKeyNotFound && err != nil {
+		return 0, err
+	}
+
+	val, err := p.Get(k)
+	if err != goukv.ErrKeyNotFound && err != nil {
+		return 0, err
+	}
+
+	var valAsFloat float64
+
+	if val == nil {
+		valAsFloat = 0
+	} else {
+		parsedVal, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			return 0, err
+		}
+		valAsFloat = parsedVal
+	}
+
+	valAsFloat += delta
+
+	var newttl time.Duration
+	if ttl != nil {
+		newttl = time.Until(*ttl)
+	}
+
+	return valAsFloat, p.Put(&goukv.Entry{
+		Key:   k,
+		Value: []byte(fmt.Sprintf("%f", valAsFloat)),
+		TTL:   newttl,
+	})
 }
 
 // Get implements goukv.Get

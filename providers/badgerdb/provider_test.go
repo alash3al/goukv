@@ -1,6 +1,7 @@
 package badgerdb
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -45,6 +46,29 @@ func TestPutGet(t *testing.T) {
 		}
 		if string(val) != string(entry.Value) {
 			t.Errorf("expected (%s), found(%s)", string(entry.Value), string(entry.Value))
+		}
+	})
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+}
+
+func TestIncr(t *testing.T) {
+	err := openDBAndDo(func(db goukv.Provider) {
+		k := []byte("counter001")
+		newVal, err := db.Incr(k, 1)
+		if err != nil {
+			t.Error(err)
+		}
+
+		val, err := db.Get(k)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if fmt.Sprintf("%f", newVal) != string(val) {
+			t.Errorf("INCR KEY counted value (%f) isn't the same as the raw value (%s)", newVal, val)
 		}
 	})
 

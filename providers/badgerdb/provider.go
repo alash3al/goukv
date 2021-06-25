@@ -1,6 +1,9 @@
 package badgerdb
 
 import (
+	"fmt"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/alash3al/goukv"
@@ -11,6 +14,7 @@ import (
 
 // Provider represents a provider
 type Provider struct {
+	l  *sync.RWMutex
 	db *badger.DB
 }
 
@@ -48,6 +52,7 @@ func (p Provider) Open(dsn *goukv.DSN) (goukv.Provider, error) {
 
 	return &Provider{
 		db: db,
+		l:  &sync.RWMutex{},
 	}, nil
 }
 
@@ -91,6 +96,46 @@ func (p Provider) Batch(entries []*goukv.Entry) error {
 	}
 
 	return batch.Flush()
+}
+
+func (p Provider) Incr(k []byte, delta float64) (float64, error) {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	ttl, err := p.TTL(k)
+	if err != goukv.ErrKeyNotFound && err != nil {
+		return 0, err
+	}
+
+	val, err := p.Get(k)
+	if err != goukv.ErrKeyNotFound && err != nil {
+		return 0, err
+	}
+
+	var valAsFloat float64
+
+	if val == nil {
+		valAsFloat = 0
+	} else {
+		parsedVal, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			return 0, err
+		}
+		valAsFloat = parsedVal
+	}
+
+	valAsFloat += delta
+
+	var newttl time.Duration
+	if ttl != nil {
+		newttl = time.Until(*ttl)
+	}
+
+	return valAsFloat, p.Put(&goukv.Entry{
+		Key:   k,
+		Value: []byte(fmt.Sprintf("%f", valAsFloat)),
+		TTL:   newttl,
+	})
 }
 
 // Get implements goukv.Get

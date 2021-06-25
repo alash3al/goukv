@@ -15,6 +15,7 @@ var (
 type Provider interface {
 	Open(*DSN) (Provider, error)
 	Put(*Entry) error
+	Incr([]byte, float64) (float64, error)
 	Get([]byte) ([]byte, error)
 	TTL([]byte) (*time.Time, error)
 	Delete([]byte) error
