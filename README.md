@@ -9,10 +9,6 @@ Available Providers
 - `leveldb`: [levelDB](/providers/leveldb)
 - `postgres`: [Postgresql](/providers/postgres)
 
-Why
-===
-> I just built this to be used in my side projects such as [redix(v2)](https://github.com/alash3al/redix/tree/v2), but you can use it with no worries, it is production-ready, and I'm open for any idea & contribution.
-
 Backend Stores Rules
 =====================
 > just keep it simple stupid!
